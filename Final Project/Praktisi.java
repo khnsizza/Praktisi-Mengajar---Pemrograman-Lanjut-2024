@@ -1,51 +1,57 @@
 package praktisi;
 
-import javax.swing.*;
 import java.io.*;
 import java.util.LinkedList;
 import java.util.Queue;
 
-class Praktisi<T> { // Membuat kelas Praktisi menjadi generik
-    private Queue<T> antrian; // Menyimpan nama pelanggan dalam antrian
-    private static final String NAMA_BERKAS = "antrian.txt";
+public class Praktisi {
+    private Queue<String> Antrian; // Menyimpan nama pelanggan dalam antrian
+    private static final String NAMA_BERKAS = "Antrian.txt";
 
     public Praktisi() {
-        antrian = new LinkedList<>();
+        Antrian = new LinkedList<>();
         muatAntrianDariBerkas(); // Memuat antrian dari berkas saat objek praktisi dibuat
     }
 
-    public void tambahPelanggan(T pelanggan) {
-        if (pelanggan == null || pelanggan.toString().isEmpty()) {
+    public void tambahPelanggan(String pelanggan) {
+        if (pelanggan == null || pelanggan.isEmpty()) {
             throw new IllegalArgumentException("Nama pelanggan tidak boleh kosong");
         }
-        antrian.add(pelanggan);
+        Antrian.add(pelanggan);
+        System.out.println("Pelanggan ditambahkan: " + pelanggan);
         simpanAntrianKeBerkas(); // Menyimpan antrian yang diperbarui ke berkas
     }
 
-    public T layaniPelanggan() {
-        T pelangganDilayani = antrian.poll(); // Menghapus dan mengembalikan pelanggan di depan antrian
+    public String layaniPelanggan() {
+        String pelangganDilayani = Antrian.poll(); // Menghapus dan mengembalikan pelanggan di depan antrian
+        if (pelangganDilayani != null) {
+            System.out.println("Melayani pelanggan: " + pelangganDilayani);
+        } else {
+            System.out.println("Tidak ada pelanggan untuk dilayani.");
+        }
         simpanAntrianKeBerkas(); // Menyimpan antrian yang telah diperbarui ke berkas
         return pelangganDilayani;
     }
 
     public int jumlahAntrian() {
-        return antrian.size(); // Mengembalikan jumlah pelanggan dalam antrian
+        return Antrian.size(); // Mengembalikan jumlah pelanggan dalam antrian
     }
 
-    public T lihatPelangganBerikutnya() {
-        return antrian.peek(); // Melihat pelanggan berikutnya tanpa mengeluarkan dari antrian
+    public String lihatPelangganBerikutnya() {
+        return Antrian.peek(); // Melihat pelanggan berikutnya tanpa mengeluarkan dari antrian
     }
 
     public boolean antrianKosong() {
-        return antrian.isEmpty(); // Memeriksa apakah antrian kosong
+        return Antrian.isEmpty(); // Memeriksa apakah antrian kosong
     }
 
     private void simpanAntrianKeBerkas() {
         try (BufferedWriter penulis = new BufferedWriter(new FileWriter(NAMA_BERKAS))) {
-            for (T pelanggan : antrian) {
-                penulis.write(pelanggan.toString());
+            for (String pelanggan : Antrian) {
+                penulis.write(pelanggan);
                 penulis.newLine(); // Menulis setiap pelanggan dalam antrian ke berkas
             }
+            penulis.flush(); // Memastikan semua data telah ditulis
             System.out.println("Antrian berhasil disimpan ke " + NAMA_BERKAS);
         } catch (IOException e) {
             System.err.println("Gagal menyimpan antrian ke berkas: " + e.getMessage());
@@ -54,15 +60,24 @@ class Praktisi<T> { // Membuat kelas Praktisi menjadi generik
     }
 
     private void muatAntrianDariBerkas() {
+        File file = new File(NAMA_BERKAS);
+        if (!file.exists()) {
+            System.out.println("File " + NAMA_BERKAS + " tidak ditemukan. Antrian dimulai dari kosong");
+            return;
+        }
         try (BufferedReader pembaca = new BufferedReader(new FileReader(NAMA_BERKAS))) {
-            String pelanggan;
-            while ((pelanggan = pembaca.readLine()) != null) {
-                antrian.add((T) pelanggan); // Meng-casting string ke tipe T, Membaca setiap baris dari berkas dan menambahkan ke antrian
+            String line;
+            while ((line = pembaca.readLine()) != null) {
+                Antrian.add(line); // Membaca setiap baris dari berkas dan menambahkan ke antrian
             }
             System.out.println("Antrian berhasil dimuat dari " + NAMA_BERKAS);
         } catch (IOException e) {
             System.err.println("Gagal memuat antrian dari berkas: " + e.getMessage());
             e.printStackTrace(); // Menangani kesalahan saat memuat dari berkas
         }
+    }
+
+    public Iterable<String> getAntrian() {
+        return Antrian; // Mengembalikan iterable dari antrian
     }
 }

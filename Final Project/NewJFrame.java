@@ -4,6 +4,9 @@
  */
 package praktisi;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import javax.swing.JOptionPane;
@@ -18,11 +21,13 @@ public class NewJFrame extends javax.swing.JFrame {
      * Creates new form NewJFrame
      */
     
-   private Praktisi <String> praktisi;
-   private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyy/MM/dd HH:mm:ss");
-   
+    private Praktisi praktisi;
+    private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyy/MM/dd HH:mm:ss");
+    private static final String LOG_FILE = "Antrianlog.txt";
+    
+    
     public NewJFrame() {
-        praktisi = new Praktisi<>();
+        praktisi = new Praktisi();
         initComponents();
         updateQueueInfo();
     }
@@ -174,25 +179,37 @@ public class NewJFrame extends javax.swing.JFrame {
 
     private void addActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addActionPerformed
         // TODO add your handling code here:
-        String namaPelanggan = NamaPelanggan.getText();
+     String namaPelanggan = NamaPelanggan.getText();
         if (!namaPelanggan.isEmpty()) {
             praktisi.tambahPelanggan(namaPelanggan);
+            String currentTime = dtf.format(LocalDateTime.now());
+            jTextArea1.append("Tambah: " + namaPelanggan + " pada " + currentTime + "\n");
+            writeToFile("Tambah: " + namaPelanggan + " pada " + currentTime);
             updateQueueInfo();
         } else {
             JOptionPane.showMessageDialog(null, "Silakan masukkan nama pelanggan.");
         }
     }//GEN-LAST:event_addActionPerformed
+ private void writeToFile(String data) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(LOG_FILE, true))) {
+            writer.write(data);
+            writer.newLine();
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error saving data to file: " + e.getMessage());
+        }
 
+}
     private void ServeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ServeActionPerformed
         // TODO add your handling code here:
         if (!praktisi.antrianKosong()) {
             String pelangganDilayani = praktisi.layaniPelanggan();
             String currentTime = dtf.format(LocalDateTime.now());
-            JOptionPane.showMessageDialog(null, "Melayani: " + pelangganDilayani);
+            JOptionPane.showMessageDialog(this, "Melayani: " + pelangganDilayani);
             jTextArea1.append("Melayani: " + pelangganDilayani + " pada " + currentTime + "\n");
+            writeToFile("Melayani: " + pelangganDilayani + " pada " + currentTime);
             updateQueueInfo();
         } else {
-            JOptionPane.showMessageDialog(null, "Tidak ada pelanggan dalam antrian.");
+            JOptionPane.showMessageDialog(this, "Tidak ada pelanggan dalam antrian.");
         }
     }//GEN-LAST:event_ServeActionPerformed
 
